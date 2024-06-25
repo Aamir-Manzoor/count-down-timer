@@ -1,4 +1,3 @@
-"use-client"
 import React, { useEffect, useState } from 'react';
 import { NumberBox } from './NumberBox';
 
@@ -28,22 +27,21 @@ export const TimerContainer = ({ minutes, seconds }: TimeProps) => {
     } else {
       setSecondsFlip(false);
     }
-  }, [minutes, seconds, prevMinutes, prevSeconds]);
+  }, [minutes, seconds]);
 
-  if (typeof seconds === 'number' && seconds < 10) {
-    seconds = '0' + seconds;
-  }
-
-  if (typeof minutes === 'number' && minutes < 10) {
-    minutes = '0' + minutes;
-  }
+  const formatTime = (time: number | string) => {
+    if (typeof time === 'number' && time < 10) {
+      return '0' + time;
+    }
+    return time;
+  };
 
   return (
     <div className="mt-2 md:mt-20 rounded-xl">
       <div className="grid grid-cols-2 gap-4 py-6 px-10 md:flex md:items-center md:justify-between md:mt-2 rounded-xl md:px-6 md:py-8">
-        <NumberBox num={minutes} unit="Minutes" flip={minutesFlip} />
+        <NumberBox num={formatTime(minutes)} unit="Minutes" flip={minutesFlip} />
         <span className="hidden text-5xl -mt-8 md:inline-block md:text-7xl font-normal text-gray-50">:</span>
-        <NumberBox num={seconds} unit="Seconds" flip={secondsFlip} />
+        <NumberBox num={formatTime(seconds)} unit="Seconds" flip={secondsFlip} />
       </div>
     </div>
   );
