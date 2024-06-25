@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { NumberBox } from './NumberBox';
 
 interface TimeProps {
@@ -7,35 +7,34 @@ interface TimeProps {
 }
 
 export const TimerContainer = ({ minutes, seconds }: TimeProps) => {
-  let minutesFlip = false;
-  let secondsFlip = true;
+  const [prevMinutes, setPrevMinutes] = useState<number | string>(minutes);
+  const [prevSeconds, setPrevSeconds] = useState<number | string>(seconds);
 
-  let numMinutes = typeof minutes === 'string' ? parseInt(minutes) : minutes;
-  let numSeconds = typeof seconds === 'string' ? parseInt(seconds) : seconds;
+  const [minutesFlip, setMinutesFlip] = useState<boolean>(false);
+  const [secondsFlip, setSecondsFlip] = useState<boolean>(false);
 
-  if (numSeconds <= 0 && numMinutes <= 0) {
-    minutesFlip = false;
-    secondsFlip = false;
-  }
-
-  if (numSeconds === 0) {
-    if (numMinutes !== 0) {
-      numSeconds = 59;
+  useEffect(() => {
+    if (minutes !== prevMinutes) {
+      setMinutesFlip(true);
+      setPrevMinutes(minutes);
+    } else {
+      setMinutesFlip(false);
     }
-    secondsFlip = false;
-    minutesFlip = true;
+
+    if (seconds !== prevSeconds) {
+      setSecondsFlip(true);
+      setPrevSeconds(seconds);
+    } else {
+      setSecondsFlip(false);
+    }
+  }, [minutes, seconds, prevMinutes, prevSeconds]);
+
+  if (typeof seconds === 'number' && seconds < 10) {
+    seconds = '0' + seconds;
   }
 
-  if (numMinutes < 10) {
-    minutes = '0' + numMinutes;
-  } else {
-    minutes = numMinutes.toString();
-  }
-
-  if (numSeconds < 10) {
-    seconds = '0' + numSeconds;
-  } else {
-    seconds = numSeconds.toString();
+  if (typeof minutes === 'number' && minutes < 10) {
+    minutes = '0' + minutes;
   }
 
   return (

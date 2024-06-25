@@ -6,47 +6,52 @@ import { Footer } from './components/Footer';
 import { Header } from './components/Header';
 import { TimerContainer } from './components/TimerContainer';
 
-
 const Home: NextPage = () => {
-  const [newTime, setNewTime] = useState<number>(25); // default time in minutes
   const [minutes, setMinutes] = useState<number>(25);
   const [seconds, setSeconds] = useState<number>(0);
   const [message, setMessage] = useState<string>('');
-  const [countDownDate, setCountDownDate] = useState<number | null>(null);
+  const [isActive, setIsActive] = useState<boolean>(false);
 
   useEffect(() => {
-    if (countDownDate === null) return;
+    let interval: NodeJS.Timeout | null = null;
 
-    const updateTime = setInterval(() => {
-      const now = new Date().getTime();
-      const difference = countDownDate - now;
+    if (isActive) {
+      interval = setInterval(() => {
+        setSeconds((prevSeconds) => {
+          if (prevSeconds === 0) {
+            if (minutes === 0) {
+              clearInterval(interval!);
+              setMessage('The Launch Has Started');
+              setIsActive(false);
+              return 0;
+            }
+            setMinutes((prevMinutes) => prevMinutes - 1);
+            return 59;
+          }
+          return prevSeconds - 1;
+        });
+      }, 1000);
+    } else if (!isActive && seconds !== 0) {
+      clearInterval(interval!);
+    }
 
-      const newMinutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
-      const newSeconds = Math.floor((difference % (1000 * 60)) / 1000);
+    return () => clearInterval(interval!);
+  }, [isActive, seconds, minutes]);
 
-      setMinutes(newMinutes);
-      setSeconds(newSeconds);
-
-      if (difference <= 0) {
-        clearInterval(updateTime);
-        setMessage('The Launch Has Started');
-        setMinutes(0);
-        setSeconds(0);
-      }
-    }, 1000);
-
-    return () => clearInterval(updateTime);
-  }, [countDownDate]);
-
-  const handleClick = () => {
-    const timeInMilliseconds = newTime * 60 * 1000;
-    setCountDownDate(new Date().getTime() + timeInMilliseconds);
+  const handleStart = () => {
+    setIsActive(true);
     setMessage('');
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const inputTime = parseInt(e.target.value, 10);
-    setNewTime(inputTime);
+  const handleStop = () => {
+    setIsActive(false);
+  };
+
+  const handleReset = () => {
+    setIsActive(false);
+    setMinutes(25);
+    setSeconds(0);
+    setMessage('');
   };
 
   return (
@@ -60,10 +65,30 @@ const Home: NextPage = () => {
 
       <TimerContainer minutes={minutes} seconds={seconds} />
 
+      <div className="flex space-x-4 mt-4">
+        <button
+          className="px-4 py-2 bg-green-500 text-white rounded"
+          onClick={handleStart}
+        >
+          Start
+        </button>
+        <button
+          className="px-4 py-2 bg-yellow-500 text-white rounded"
+          onClick={handleStop}
+        >
+          Pause
+        </button>
+        <button
+          className="px-4 py-2 bg-red-500 text-white rounded"
+          onClick={handleReset}
+        >
+          Reset
+        </button>
+      </div>
+
       <Footer />
     </div>
   );
 };
 
 export default Home;
-
